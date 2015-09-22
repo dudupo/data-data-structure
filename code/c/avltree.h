@@ -19,15 +19,21 @@ struct avltree
 	int maxsize;
 };
 
-struct avltree create_avltree(int maxsize);
-void insert(struct avltree  * _avltree, int x);
-int search(struct avltree  * _avltree, int x);
-void _delete(struct avltree * _avltree, int x);
-void rotateL(struct avltree * _avltree, int node);
-void rotateR(struct avltree * _avltree, int node);
-void printavl(struct avltree * _avltree);
-int rotateifneeded(struct avltree * _avltree, int pos);
-int isleftchield(struct avltree * _avltree , int node);
-
+struct avltree * avl_create(int maxsize);
+void avl_insert(struct avltree  * _avltree, int x);
+int avl_search(struct avltree  * _avltree, int x);
+void avl_delete(struct avltree * _avltree, int x);
+void avl_rotateL(struct avltree * _avltree, int node);
+void avl_rotateR(struct avltree * _avltree, int node);
+void avl_print(struct avltree * _avltree);
+int avl_rotateifneeded(struct avltree * _avltree, int pos);
+int avl_isleftchield(struct avltree * _avltree , int node);
+int avl_greater(struct avltree * _avltree, int x);
+//int avl_smaller(struct avltree * _avltree, int x);
 #define new(type , n) (type*)malloc(sizeof(type) * n)
 #define max(a,b) a > b ? a : b
+#define swap(type ,a ,b)\
+	type temp_swap = a;\
+	a = b;\
+	b = temp_swap;
+	

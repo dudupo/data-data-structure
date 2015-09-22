@@ -1,21 +1,21 @@
 #include "avltree.h"
 
-struct avltree create_avltree(int maxsize)
+struct avltree * avl_create(int maxsize)
 {
-	struct avltree ret;
-	ret.keys   = new(int, maxsize);
-	ret.left   = new(int, maxsize);
-	ret.right  = new(int, maxsize);
-	ret.perent = new(int, maxsize);
-	ret.lenpathL = new(int, maxsize);
-	ret.lenpathR = new(int, maxsize);
-	ret.root   = 1;
-	ret.maxsize= maxsize;
-	ret.length = 1;
-	ret._stack = 0;
-	return ret;
+	struct avltree * ret = new(struct avltree , 1);
+	ret->keys   = new(int, maxsize);
+	ret->left   = new(int, maxsize);
+	ret->right  = new(int, maxsize);
+	ret->perent = new(int, maxsize);
+	ret->lenpathL = new(int, maxsize);
+	ret->lenpathR = new(int, maxsize);
+	ret->root   = 1;
+	ret->maxsize= maxsize;
+	ret->length = 1;
+	ret->_stack = 0;
+	return &ret[0];
 }
-void insert(struct avltree * _avltree, int x)
+void avl_insert(struct avltree * _avltree, int x)
 {
 	if (_avltree->length >= _avltree->maxsize)
 		return;
@@ -69,7 +69,7 @@ void insert(struct avltree * _avltree, int x)
 
 		while (pos != _avltree->root)
 		{
-			pos = rotateifneeded(_avltree , pos);
+			pos = avl_rotateifneeded(_avltree , pos);
 
 			if (navigate % 2)
 			{
@@ -86,7 +86,7 @@ void insert(struct avltree * _avltree, int x)
 			pos = _avltree->perent[pos];
 			navigate /= 2;
 		}
-		pos = rotateifneeded(_avltree ,pos);
+		pos = avl_rotateifneeded(_avltree ,pos);
 	}
 	if (! _avltree->_stack)
 		_avltree->length++;
@@ -94,10 +94,10 @@ void insert(struct avltree * _avltree, int x)
 		_avltree->_stack = _avltree->_stack->next;
 }
 
-void rotateR(struct avltree * _avltree, int node)
+void avl_rotateR(struct avltree * _avltree, int node)
 {
 	int leftchiled = _avltree->left[node];
-	if (isleftchield(_avltree, node))
+	if (avl_isleftchield(_avltree, node))
 	{
 		_avltree->left[_avltree->perent[node]] = leftchiled;
 	}
@@ -119,10 +119,10 @@ void rotateR(struct avltree * _avltree, int node)
 	_avltree->lenpathR[_avltree->perent[node]]++;
 }
 
-void rotateL(struct avltree * _avltree, int node)
+void avl_rotateL(struct avltree * _avltree, int node)
 {
 	int rightchield = _avltree->right[node];
-	if (isleftchield(_avltree , node))
+	if (avl_isleftchield(_avltree , node))
 	{
 		_avltree->left[_avltree->perent[node]] = rightchield;
 	}
@@ -143,28 +143,28 @@ void rotateL(struct avltree * _avltree, int node)
 	 _avltree->lenpathR[node]);
 	_avltree->lenpathL[_avltree->perent[node]]++;
 }
-int rotateifneeded(struct avltree * _avltree, int pos)
+int avl_rotateifneeded(struct avltree * _avltree, int pos)
 {
 	int difference =\
 			 _avltree->lenpathL[pos] - _avltree->lenpathR[pos];
 
 	if (difference > 1)
 	{
-		rotateR(_avltree ,pos);
+		avl_rotateR(_avltree ,pos);
 		pos = _avltree->perent[pos];
 	}
 	else if(difference < -1)
 	{
-		rotateL(_avltree ,pos);
+		avl_rotateL(_avltree ,pos);
 		pos = _avltree->perent[pos];
 	}
 	return pos;
 }
-int isleftchield(struct avltree * _avltree , int node)
+int avl_isleftchield(struct avltree * _avltree , int node)
 {
 	return _avltree->left[_avltree->perent[node]] == node;
 }
-void printavl(struct avltree * _avltree)
+void avl_print(struct avltree * _avltree)
 {
 	int * qeue = new(int ,_avltree->maxsize);
 	int * deep = new(int ,_avltree->maxsize);
@@ -194,16 +194,18 @@ void printavl(struct avltree * _avltree)
 	}
 	printf("\n");
 }
-int search(struct avltree  * _avltree, int x)
+int avl_search(struct avltree  * _avltree, int x)
 {
 	int pos  = _avltree->root;
+	int ret  = pos;
 	int done = 0;
 	while (!done)
 	{
 		if (pos == 0 || _avltree->keys[pos] == x)
 		{
+			if (pos)
+				ret = pos;
 			done = 1;
-			return pos;
 		}
 		else if (_avltree->keys[pos] > x)
 		{
@@ -211,14 +213,17 @@ int search(struct avltree  * _avltree, int x)
 		}
 		else
 		{
+			ret = pos;
 			pos = _avltree->right[pos];
 		}
 	}
+	// not expected
+	return ret;
 }
 //@todo::
-void _delete(struct avltree * _avltree, int x)
+void avl_delete(struct avltree * _avltree, int x)
 {
-	int pos = search(_avltree , x);
+	int pos = avl_search(_avltree , x);
 	int position = pos; // orignal.
 	int rightchield = _avltree->right[pos];
 	int leftchiled  = _avltree->left[pos];
@@ -245,4 +250,35 @@ void _delete(struct avltree * _avltree, int x)
 	{
 
 	}
+}
+int avl_greater(struct avltree * _avltree, int x)
+{
+	/*
+		note that _avltree include varible x,
+		and we seeking for the one who greater then him.
+	*/
+	int pos     = _avltree->root;
+	int greater = _avltree->root;
+	int done = 0;
+	while (!done)
+	{
+		if (pos == 0)
+		{
+			done = 1;
+		}
+		else if (_avltree->keys[pos] == x)
+		{
+			pos = _avltree->right[pos];
+		}
+		else if (_avltree->keys[pos] > x)
+		{
+			greater = pos;
+			pos = _avltree->left[pos];
+		}
+		else
+		{
+			pos = _avltree->right[pos];
+		}
+	}
+	return greater;
 }
